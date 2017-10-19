@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TableCorector"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="165.057" Width="276.421">
     <Grid>
-        
+        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="21,20,0,0" VerticalAlignment="Top" Width="222" Height="85" FontSize="48" Click="button_Click"/>
+
     </Grid>
 </Window>
