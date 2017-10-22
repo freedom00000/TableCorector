@@ -31,7 +31,7 @@ namespace TableCorector
 
             using (WordprocessingDocument docWord = WordprocessingDocument.Open(filepath, true))
             {
-                Table table1 = docWord.MainDocumentPart.Document.Body.Elements<Table>().First();
+                
                 foreach (var table in docWord.MainDocumentPart.Document.Body.Elements<Table>())
                 {
 
@@ -79,6 +79,8 @@ namespace TableCorector
         }
         void shapkaCorrector(TableRow shapka)
         {
+            TableRowProperties tbRp = new TableRowProperties(new TableHeader());
+            shapka.PrependChild(tbRp);
             foreach (TableCell cell in shapka.Elements<TableCell>())
             {
                 ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
