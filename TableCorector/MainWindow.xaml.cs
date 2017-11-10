@@ -34,29 +34,33 @@ namespace TableCorector
             {
 
                 foreach (var table in docWord.MainDocumentPart.Document.Body.Elements<Table>())
-                { 
+                {
                     List<List<string>> numCells = new List<List<string>>();
                     int i = 0;
+                    int prev_shapka = 0;
                     double check;
                     foreach (var item in table.Elements<TableRow>())
                     {
-                        
-                        if (i == 0)
+
+                        if (prev_shapka == 0 ||
+                            prev_shapka != item.Elements<TableCell>().Count()
+                            && i < 2)
                         {
                             shapkaCorrector(item);
                             i++;
                         }
                         else
-                        {int j = 0;
+                        {
+                            int j = 0;
                             List<string> list = new List<string>();
 
                             foreach (TableCell c in item.Elements<TableCell>())
                             {
-                                
+
                                 if (Double.TryParse(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text, out check))
                                 {
                                     string st = "";
-                                    foreach(var str in c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>())
+                                    foreach (var str in c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>())
                                     {
                                         st += str.Text;
                                     }
@@ -87,10 +91,10 @@ namespace TableCorector
                             }
                             numCells.Add(list);
                         }
-                        
-                        
+
+                        prev_shapka = item.Elements<TableCell>().Count();
                     }
-                    numCorrector(numCells, table);
+                    // numCorrector(numCells, table);
                     i++;
                 }
             }
@@ -149,37 +153,38 @@ namespace TableCorector
             int str_count = 0;
 
             str_count = count - str.Split(',')[0].Count();
-            str = str.Insert(0, new string(Char.Parse("\u00A0"), str_count*2));
-         
+            str = str.Insert(0, new string(Char.Parse("\u00A0"), str_count * 2));
+
 
             return str;
         }
 
-        void insertTable(Table table, List<List<string>> list) {
+        void insertTable(Table table, List<List<string>> list)
+        {
             int j = -1;
             int i = -1;
             foreach (var item in table.Elements<TableRow>())
             {
                 j = 0;
                 foreach (TableCell c in item.Elements<TableCell>())
-                    {
+                {
 
-                        foreach (Paragraph para in c.Elements<Paragraph>())
-                        {
+                    foreach (Paragraph para in c.Elements<Paragraph>())
+                    {
                         foreach (Run run in para.Elements<Run>())
                         {
 
                             foreach (var t in run.Elements<Text>())
                             {
-                                if (i >= 0 && j >= 0  && j<4)
-                                if (list[i][j] != null)
-                                t.Text = list[i][j];
+                                if (i >= 0 && j >= 0 && j < 4)
+                                    if (list[i][j] != null)
+                                        t.Text = list[i][j];
                             }
-                             
-                             }
+
                         }
-                    j++;
                     }
+                    j++;
+                }
 
                 i++;
 
