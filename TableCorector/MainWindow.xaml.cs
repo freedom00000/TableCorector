@@ -59,12 +59,6 @@ namespace TableCorector
 
                                 if (Double.TryParse(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text, out check))
                                 {
-                                    string st = "";
-                                    foreach (var str in c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>())
-                                    {
-                                        st += str.Text;
-                                    }
-
                                     list.Add(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text);
                                     ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
                                     c.PrependChild(pPr);
@@ -80,10 +74,11 @@ namespace TableCorector
                                 {
                                     foreach (Run run in para.Elements<Run>())
                                     {
-                                        RunProperties rPr = new RunProperties(new RunFonts() { Ascii = "Times New Roman" },
-                                                                      new FontSize() { Val = "24" });
+                                        RunProperties rPr = new RunProperties(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                                                                      new FontSize() { Val = "24" },
+                                                                      new Color() { Val = "000000"});
                                         run.PrependChild(rPr);
-
+                                        run.RemoveChild(run.Elements<RunProperties>().Last());
 
                                     }
                                 }
@@ -108,14 +103,17 @@ namespace TableCorector
             {
                 ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
                 cell.PrependChild(pPr);
+                cell.RemoveChild(cell.Elements<ParagraphProperties>().Last());
 
                 foreach (Paragraph para in cell.Elements<Paragraph>())
                 {
                     foreach (Run run in para.Elements<Run>())
                     {
-                        RunProperties rPr = new RunProperties(new RunFonts() { Ascii = "Times New Roman" },
-                                                      new FontSize() { Val = "28" });
+                        RunProperties rPr = new RunProperties(new RunFonts() { Ascii = "Times New Roman" , HighAnsi = "Times New Roman" },
+                                                      new FontSize() { Val = "28" },
+                                                      new Color() { Val = "000000" });
                         run.PrependChild(rPr);
+                        run.RemoveChild(run.Elements<RunProperties>().Last());
                     }
                 }
             }
@@ -182,6 +180,7 @@ namespace TableCorector
                             }
 
                         }
+
                     }
                     j++;
                 }
