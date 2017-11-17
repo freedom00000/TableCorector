@@ -32,9 +32,30 @@ namespace TableCorector
 
             using (WordprocessingDocument docWord = WordprocessingDocument.Open(filepath, true))
             {
-
+                PageSize pgSz = docWord.MainDocumentPart.Document.Descendants<SectionProperties>().FirstOrDefault().Descendants<PageSize>().FirstOrDefault();
+                PageMargin pgMr = docWord.MainDocumentPart.Document.Descendants<SectionProperties>().FirstOrDefault().Descendants<PageMargin>().FirstOrDefault();
+                TableProperties tblPr = new TableProperties(new TableWidth() { Width = "0", Type = TableWidthUnitValues.Auto },
+                                            new TableStyle() { Val = "A3" },
+                                            new TableLook() { Val = "04A0", NoVerticalBand = true, NoHorizontalBand = false, LastColumn = false, FirstColumn = true, LastRow = false, FirstRow = true },
+                                            new TableBorders()
+                                            {
+                                                BottomBorder = new BottomBorder() { Val = BorderValues.Single },
+                                                TopBorder = new TopBorder() { Val = BorderValues.Single },
+                                                LeftBorder = new LeftBorder() { Val = BorderValues.Single },
+                                                RightBorder = new RightBorder() { Val = BorderValues.Single },
+                                                InsideHorizontalBorder = new InsideHorizontalBorder() { Val = BorderValues.Single },
+                                                InsideVerticalBorder = new InsideVerticalBorder() { Val = BorderValues.Single }
+                                            });
                 foreach (var table in docWord.MainDocumentPart.Document.Body.Elements<Table>())
                 {
+                    int maxWidth = Int32.Parse(pgSz.Width) - (Int32.Parse(pgMr.Left) + Int32.Parse(pgMr.Right));
+                    TableWidth tw = table.Elements<TableProperties>().FirstOrDefault().Descendants<TableWidth>().FirstOrDefault();
+                    if (maxWidth < Int32.Parse(tw.Width))
+                    {
+                        if (table.Elements<TableProperties>().Count() > 0)
+                            table.RemoveChild(table.Elements<TableProperties>().First());
+                        table.PrependChild(tblPr);
+                    }
                     List<List<string>> numCells = new List<List<string>>();
                     int i = 0;
                     int prev_shapka = 0;
@@ -78,6 +99,7 @@ namespace TableCorector
                                                                       new FontSize() { Val = "24" },
                                                                       new Color() { Val = "000000"});
                                         run.PrependChild(rPr);
+                                        if(run.Elements<RunProperties>().Count() < 1)
                                         run.RemoveChild(run.Elements<RunProperties>().Last());
 
                                     }
@@ -103,6 +125,7 @@ namespace TableCorector
             {
                 ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
                 cell.PrependChild(pPr);
+                if(cell.Elements<ParagraphProperties>().Count() >1)
                 cell.RemoveChild(cell.Elements<ParagraphProperties>().Last());
 
                 foreach (Paragraph para in cell.Elements<Paragraph>())
@@ -119,77 +142,77 @@ namespace TableCorector
             }
         }
 
+        
+        //void numCorrector(List<List<string>> list, Table table)
+        //{
+        //    int count = 0;
+        //    for (int i = 0; i < list[1].Count; i++)
+        //    {
+        //        for (int j = 0; j < list.Count; j++)
+        //        {
+        //            if (list[j][i] != null &&
+        //                count < list[j][i].Split(',')[0].Count())
+        //            {
+        //                count = list[j][i].Split(',')[0].Count();
+        //            }
+        //        }
 
-        void numCorrector(List<List<string>> list, Table table)
-        {
-            int count = 0;
-            for (int i = 0; i < list[1].Count; i++)
-            {
-                for (int j = 0; j < list.Count; j++)
-                {
-                    if (list[j][i] != null &&
-                        count < list[j][i].Split(',')[0].Count())
-                    {
-                        count = list[j][i].Split(',')[0].Count();
-                    }
-                }
+        //        for (int j = 0; j < list.Count; j++)
+        //        {
+        //            if (list[j][i] != null)
+        //            {
+        //                list[j][i] = addSpace(count, list[j][i]);
+        //            }
+        //        }
+        //    }
 
-                for (int j = 0; j < list.Count; j++)
-                {
-                    if (list[j][i] != null)
-                    {
-                        list[j][i] = addSpace(count, list[j][i]);
-                    }
-                }
-            }
+        //    insertTable(table, list);
+        //}
 
-            insertTable(table, list);
-        }
+        //string addSpace(int count, string str)
+        //{
+        //    int str_count = 0;
 
-        string addSpace(int count, string str)
-        {
-            int str_count = 0;
-
-            str_count = count - str.Split(',')[0].Count();
-            str = str.Insert(0, new string(Char.Parse("\u00A0"), str_count * 2));
+        //    str_count = count - str.Split(',')[0].Count();
+        //    str = str.Insert(0, new string(Char.Parse("\u00A0"), str_count * 2));
 
 
-            return str;
-        }
+        //    return str;
+        //}
 
-        void insertTable(Table table, List<List<string>> list)
-        {
-            int j = -1;
-            int i = -1;
-            foreach (var item in table.Elements<TableRow>())
-            {
-                j = 0;
-                foreach (TableCell c in item.Elements<TableCell>())
-                {
+        //void insertTable(Table table, List<List<string>> list)
+        //{
+        //    int j = -1;
+        //    int i = -1;
+        //    foreach (var item in table.Elements<TableRow>())
+        //    {
+        //        j = 0;
+        //        foreach (TableCell c in item.Elements<TableCell>())
+        //        {
 
-                    foreach (Paragraph para in c.Elements<Paragraph>())
-                    {
-                        foreach (Run run in para.Elements<Run>())
-                        {
+        //            foreach (Paragraph para in c.Elements<Paragraph>())
+        //            {
+        //                foreach (Run run in para.Elements<Run>())
+        //                {
 
-                            foreach (var t in run.Elements<Text>())
-                            {
-                                if (i >= 0 && j >= 0 && j < 4)
-                                    if (list[i][j] != null)
-                                        t.Text = list[i][j];
-                            }
+        //                    foreach (var t in run.Elements<Text>())
+        //                    {
+        //                        if (i >= 0 && j >= 0 && j < 4)
+        //                            if (list[i][j] != null)
+        //                                t.Text = list[i][j];
+        //                    }
 
-                        }
+        //                }
 
-                    }
-                    j++;
-                }
+        //            }
+        //            j++;
+        //        }
 
-                i++;
+        //        i++;
 
-            }
+        //    }
 
-        }
+        //}
 
     }
 }
