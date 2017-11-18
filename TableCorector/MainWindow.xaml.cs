@@ -54,7 +54,9 @@ namespace TableCorector
                     {
                         if (table.Elements<TableProperties>().Count() > 0)
                             table.RemoveChild(table.Elements<TableProperties>().First());
-                        table.PrependChild(tblPr);
+                        
+                        table.PrependChild(tblPr.CloneNode(true));
+
                     }
                     List<List<string>> numCells = new List<List<string>>();
                     int i = 0;
@@ -77,29 +79,63 @@ namespace TableCorector
 
                             foreach (TableCell c in item.Elements<TableCell>())
                             {
-
-                                if (Double.TryParse(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text, out check))
+                                TableCellProperties tbcPr = (TableCellProperties)c.Elements<TableCellProperties>().FirstOrDefault().CloneNode(true);
+                                try
                                 {
-                                    list.Add(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text);
-                                    ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
-                                    c.PrependChild(pPr);
+                                    if (Double.TryParse(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text, out check))
+                                    {
+                                        if (tbcPr.Elements<Justification>().Count() > 0)
+                                            tbcPr.Elements<Justification>().FirstOrDefault().Val =  JustificationValues.Center ;
+                                        list.Add(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text);
+                                        c.PrependChild(tbcPr);
+                                    }
+                                    else
+                                    {
+                                        list.Add(null);
+                                        if (tbcPr.Elements<Justification>().Count() > 0)
+                                            tbcPr.Elements<Justification>().FirstOrDefault().Val = JustificationValues.Both;
+                                        c.PrependChild(tbcPr);
+                                    }
                                 }
-                                else
-                                {
+                                catch {
                                     list.Add(null);
-                                    ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Both });
-                                    c.PrependChild(pPr);
+                                    if (tbcPr.Elements<Justification>().Count() > 0)
+                                    tbcPr.Elements<Justification>().FirstOrDefault().Val = JustificationValues.Both;
+                                    c.PrependChild(tbcPr);
                                 }
 
+                                if (c.Elements<TableCellProperties>().Count() > 1)
+                                        c.RemoveChild(c.Elements < TableCellProperties>().Last());
                                 foreach (Paragraph para in c.Elements<Paragraph>())
                                 {
+                                    try
+                                    {
+                                        if (Double.TryParse(para.Elements<Run>().First().Elements<Text>().First().Text, out check))
+                                        {
+                                            ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
+                                            para.PrependChild(pPr);
+                                        }
+                                        else
+                                        {
+                                            ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Both });
+                                            para.PrependChild(pPr);
+                                        }
+                                    }
+                                    catch
+                                    {
+                                
+                                        ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Both });
+                                        para.PrependChild(pPr);
+                                    }
+                                    if (para.Elements<ParagraphProperties>().Count() > 1)
+                                        para.RemoveChild(para.Elements<ParagraphProperties>().Last());
                                     foreach (Run run in para.Elements<Run>())
                                     {
                                         RunProperties rPr = new RunProperties(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
                                                                       new FontSize() { Val = "24" },
                                                                       new Color() { Val = "000000"});
                                         run.PrependChild(rPr);
-                                        if(run.Elements<RunProperties>().Count() < 1)
+                                        if (run.Elements<RunProperties>().Count() > 1)
                                         run.RemoveChild(run.Elements<RunProperties>().Last());
 
                                     }
@@ -123,10 +159,12 @@ namespace TableCorector
             shapka.PrependChild(tbRp);
             foreach (TableCell cell in shapka.Elements<TableCell>())
             {
-                ParagraphProperties pPr = new ParagraphProperties(new Justification() { Val = JustificationValues.Center });
-                cell.PrependChild(pPr);
-                if(cell.Elements<ParagraphProperties>().Count() >1)
-                cell.RemoveChild(cell.Elements<ParagraphProperties>().Last());
+                TableCellProperties tbcPr = (TableCellProperties)cell.Elements<TableCellProperties>().FirstOrDefault().CloneNode(true);
+                if (tbcPr.Elements<Justification>().Count() > 0)
+                    tbcPr.Elements<Justification>().FirstOrDefault().Val = JustificationValues.Center;
+                cell.PrependChild(tbcPr);
+                if(cell.Elements<TableCellProperties>().Count() > 1)
+                cell.RemoveChild(cell.Elements<TableCellProperties>().Last());
 
                 foreach (Paragraph para in cell.Elements<Paragraph>())
                 {
@@ -136,7 +174,8 @@ namespace TableCorector
                                                       new FontSize() { Val = "28" },
                                                       new Color() { Val = "000000" });
                         run.PrependChild(rPr);
-                        run.RemoveChild(run.Elements<RunProperties>().Last());
+                        if (run.Elements<RunProperties>().Count() > 1)
+                            run.RemoveChild(run.Elements<RunProperties>().Last());
                     }
                 }
             }
