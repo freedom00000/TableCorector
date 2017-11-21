@@ -86,6 +86,12 @@ namespace TableCorector
                                     {
                                         if (tbcPr.Elements<Justification>().Count() > 0)
                                             tbcPr.Elements<Justification>().FirstOrDefault().Val =  JustificationValues.Center ;
+                                        if (tbcPr.Elements<Shading>().Count() > 0)
+                                        {
+                                            tbcPr.Elements<Shading>().FirstOrDefault().Color = "ffffff";
+                                            tbcPr.Elements<Shading>().FirstOrDefault().Fill = "ffffff";
+                                            tbcPr.Elements<Shading>().FirstOrDefault().Val = ShadingPatternValues.Clear;
+                                        }
                                         list.Add(c.Elements<Paragraph>().First().Elements<Run>().First().Elements<Text>().First().Text);
                                         c.PrependChild(tbcPr);
                                     }
@@ -94,6 +100,12 @@ namespace TableCorector
                                         list.Add(null);
                                         if (tbcPr.Elements<Justification>().Count() > 0)
                                             tbcPr.Elements<Justification>().FirstOrDefault().Val = JustificationValues.Both;
+                                        if (tbcPr.Elements<Shading>().Count() > 0)
+                                        {
+                                            tbcPr.Elements<Shading>().FirstOrDefault().Color = "ffffff";
+                                            tbcPr.Elements<Shading>().FirstOrDefault().Fill = "ffffff";
+                                            tbcPr.Elements<Shading>().FirstOrDefault().Val = ShadingPatternValues.Clear;
+                                        }
                                         c.PrependChild(tbcPr);
                                     }
                                 }
@@ -101,6 +113,12 @@ namespace TableCorector
                                     list.Add(null);
                                     if (tbcPr.Elements<Justification>().Count() > 0)
                                     tbcPr.Elements<Justification>().FirstOrDefault().Val = JustificationValues.Both;
+                                    if (tbcPr.Elements<Shading>().Count() > 0)
+                                    {
+                                        tbcPr.Elements<Shading>().FirstOrDefault().Color = "ffffff";
+                                        tbcPr.Elements<Shading>().FirstOrDefault().Fill = "ffffff";
+                                        tbcPr.Elements<Shading>().FirstOrDefault().Val = ShadingPatternValues.Clear;
+                                    }
                                     c.PrependChild(tbcPr);
                                 }
 
@@ -162,16 +180,24 @@ namespace TableCorector
                 TableCellProperties tbcPr = (TableCellProperties)cell.Elements<TableCellProperties>().FirstOrDefault().CloneNode(true);
                 if (tbcPr.Elements<Justification>().Count() > 0)
                     tbcPr.Elements<Justification>().FirstOrDefault().Val = JustificationValues.Center;
+                if (tbcPr.Elements<Shading>().Count() > 0)
+                {
+                    tbcPr.Elements<Shading>().FirstOrDefault().Color = "ffffff";
+                    tbcPr.Elements<Shading>().FirstOrDefault().Fill = "ffffff";
+                    tbcPr.Elements<Shading>().FirstOrDefault().Val = ShadingPatternValues.Clear;
+                }
                 cell.PrependChild(tbcPr);
                 if(cell.Elements<TableCellProperties>().Count() > 1)
                 cell.RemoveChild(cell.Elements<TableCellProperties>().Last());
 
                 foreach (Paragraph para in cell.Elements<Paragraph>())
                 {
+                    if (para.Elements<ParagraphProperties>().Count() > 0)
+                        para.RemoveChild(para.Elements<ParagraphProperties>().Last());
                     foreach (Run run in para.Elements<Run>())
                     {
                         RunProperties rPr = new RunProperties(new RunFonts() { Ascii = "Times New Roman" , HighAnsi = "Times New Roman" },
-                                                      new FontSize() { Val = "28" },
+                                                      new FontSize() { Val = "24" },
                                                       new Color() { Val = "000000" });
                         run.PrependChild(rPr);
                         if (run.Elements<RunProperties>().Count() > 1)
